@@ -19,9 +19,9 @@ entry: linux-system-img
 entry: busybox-static
     enable-relnotes: false
     types: pkg #pkg-src
-    version: 1.3.7
+    version: 1.37.0
     pkgfile: /dist/pool/x86_64/busybox.pkg
-    if-src: /dist/pool/x86_64/src/busybox.gz
+    if-src: /dist/pool/x86_64/src/busybox-1.37.0.tar.gz
     architecture: x86_64
     description:
-        busybox 1.3.7 package
+        busybox 1.37.0 package
