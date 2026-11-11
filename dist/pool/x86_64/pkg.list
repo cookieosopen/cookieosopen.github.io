@@ -1,0 +1,11 @@
+# Uncomment #pkg-src if you want to allow the kernel sources to be 
+# enabled
+entry: linux-system-img
+    types: pkg #pkg-src
+    version: 7.4.0-rc2
+    pkgfile: /dist/pool/x86_64/linuxkernel.pkg
+    architecture: x86_64
+    description:
+        CookieOS Linux Kernel Image.
+    depends:
+        /dist/pool/x86_64/linuxheaders.pkg
