@@ -3,10 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CookieOS Package Repo</title>
+
+    <title>CookieOS Package Repository</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #111318;
+            color: #e8e8e8;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background: #191c23;
+            border-bottom: 1px solid #30343d;
+            padding: 25px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #ffc66d;
+        }
+
+        header p {
+            color: #999;
+            margin-bottom: 0;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #1b1f28;
+            border: 1px solid #30343d;
+            border-radius: 8px;
+            padding: 18px;
+            flex: 1;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 25px;
+            color: #ffc66d;
+        }
+
+        .search {
+            width: 100%;
+            padding: 14px;
+            background: #1b1f28;
+            color: white;
+            border: 1px solid #383e49;
+            border-radius: 7px;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #1b1f28;
+            border: 1px solid #30343d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .panel h2 {
+            font-size: 17px;
+            padding: 17px;
+            margin: 0;
+            border-bottom: 1px solid #30343d;
+        }
+
+        .package {
+            padding: 16px;
+            border-bottom: 1px solid #30343d;
+            cursor: pointer;
+        }
+
+        .package:hover,
+        .package.active {
+            background: #292f3b;
+        }
+
+        .package strong {
+            color: #ffc66d;
+        }
+
+        .package small {
+            display: block;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .tag {
+            float: right;
+            color: #a9c9ff;
+            font-size: 12px;
+        }
+
+        #details {
+            padding: 18px;
+        }
+
+        #details h3 {
+            color: #ffc66d;
+            margin-top: 0;
+        }
+
+        #details p {
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        a {
+            color: #ffc66d;
+        }
+
+        .download {
+            display: inline-block;
+            background: #ffc66d;
+            color: #171717;
+            text-decoration: none;
+            padding: 11px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .download:hover {
+            background: #ffda9b;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            padding: 35px;
+        }
+
+        @media(max-width: 700px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h3>You wont find anything interesting to look at here!</h3>
-    
+
+<header>
+    <h1>CookieOS</h1>
+    <p>Package Index Explorer</p>
+</header>
+
+<main>
+
+    <div class="stats">
+        <div class="stat">
+            <strong id="package-count">0</strong>
+            Packages
+        </div>
+
+        <div class="stat">
+            <strong id="source-count">0</strong>
+            Source packages
+        </div>
+    </div>
+
+    <input
+        class="search"
+        id="search"
+        type="search"
+        placeholder="Search packages..."
+        autocomplete="off"
+    >
+
+    <div class="layout">
+
+        <section class="panel">
+            <h2>Package Index</h2>
+            <div id="package-list"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Package Information</h2>
+
+            <div id="details">
+                <p>Select a package to inspect it.</p>
+            </div>
+        </section>
+
+    </div>
+
+</main>
+
+<footer>
+    CookieOS Package Repository
+</footer>
+
+<script>
+"use strict";
+
+/*
+ * CookieOS Package Index
+ *
+ * Add new packages to this array.
+ * Archives must exist in the repository.
+ */
+
+const packages = [
+    {
+        name: "busybox",
+        version: "1.37.0",
+        type: "Source",
+        archive: "busybox-1.37.0.tar.gz",
+        description:
+            "The BusyBox multi-call binary. Provides implementations of many standard Unix utilities.",
+        homepage: "https://busybox.net/",
+        license: "GPL-2.0-only"
+    }
+];
+
+let selectedPackage = null;
+
+const packageList = document.getElementById("package-list");
+const details = document.getElementById("details");
+const search = document.getElementById("search");
+
+function createElement(tag, text, className) {
+    const element = document.createElement(tag);
+
+    if (text !== undefined) {
+        element.textContent = text;
+    }
+
+    if (className) {
+        element.className = className;
+    }
+
+    return element;
+}
+
+function renderPackages() {
+    const query = search.value.trim().toLowerCase();
+
+    packageList.replaceChildren();
+
+    const filtered = packages.filter(pkg => {
+        return (
+            pkg.name.toLowerCase().includes(query) ||
+            pkg.version.toLowerCase().includes(query) ||
+            pkg.type.toLowerCase().includes(query) ||
+            pkg.description.toLowerCase().includes(query)
+        );
+    });
+
+    if (filtered.length === 0) {
+        packageList.appendChild(
+            createElement("p", "No packages found.")
+        );
+
+        return;
+    }
+
+    filtered.forEach(pkg => {
+        const item = createElement("div", undefined, "package");
+
+        if (selectedPackage === pkg.name) {
+            item.classList.add("active");
+        }
+
+        const name = createElement("strong", pkg.name);
+        const type = createElement("span", pkg.type, "tag");
+        const version = createElement(
+            "small",
+            "Version " + pkg.version
+        );
+
+        item.append(name, type, version);
+
+        item.addEventListener("click", () => {
+            selectedPackage = pkg.name;
+            showDetails(pkg);
+            renderPackages();
+        });
+
+        packageList.appendChild(item);
+    });
+}
+
+function showDetails(pkg) {
+    details.replaceChildren();
+
+    const heading = createElement("h3", pkg.name);
+
+    const description = createElement(
+        "p",
+        pkg.description
+    );
+
+    const version = createElement(
+        "p",
+        "Version: " + pkg.version
+    );
+
+    const type = createElement(
+        "p",
+        "Package type: " + pkg.type
+    );
+
+    const license = createElement(
+        "p",
+        "License: " + pkg.license
+    );
+
+    const archive = createElement(
+        "p",
+        "Archive: " + pkg.archive
+    );
+
+    const homepage = createElement("a", "Project Homepage");
+    homepage.href = pkg.homepage;
+    homepage.target = "_blank";
+    homepage.rel = "noopener noreferrer";
+
+    const download = createElement(
+        "a",
+        "Download Source",
+        "download"
+    );
+
+    download.href = pkg.archive;
+    download.setAttribute("download", "");
+
+    details.append(
+        heading,
+        description,
+        version,
+        type,
+        license,
+        archive,
+        homepage,
+        document.createElement("br"),
+        download
+    );
+}
+
+function updateStats() {
+    document.getElementById("package-count").textContent =
+        packages.length;
+
+    document.getElementById("source-count").textContent =
+        packages.filter(pkg => pkg.type === "Source").length;
+}
+
+search.addEventListener("input", renderPackages);
+
+updateStats();
+renderPackages();
+
+</script>
+
 </body>
 </html>
