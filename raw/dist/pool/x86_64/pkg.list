@@ -1,17 +1,23 @@
 # Uncomment #pkg-src if you want to allow the sources to be 
 # enabled
 entry: linux-system-img
+    enable-relnotes: true
     types: pkg #pkg-src
     version: 7.4.0-rc2
     pkgfile: /dist/pool/x86_64/linuxkernel.pkg
     if-src: /dist/pool/x86_64/src/linuxkernel.gz
     architecture: x86_64
+    relnotes:
+        CookieOS  linux kernel image
+        kernelversion 7.4.0-rc2
+        git sources: https://github.com/cookieosopen/linux.git
     description:
         CookieOS Linux Kernel Image.
     depends:
         /dist/pool/x86_64/linuxheaders.pkg
 
 entry: busybox-static
+    enable-relnotes: false
     types: pkg #pkg-src
     version: 1.3.7
     pkgfile: /dist/pool/x86_64/busybox.pkg
